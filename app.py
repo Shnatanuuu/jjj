@@ -153,8 +153,10 @@ with c1:
 
 with c2:
     st.markdown('<p class="section-title">Rating distribution by brand</p>', unsafe_allow_html=True)
+    brand_order_rating = df.groupby("Brand")["Ratings"].mean().sort_values(ascending=False).index.tolist()
     fig2 = px.box(df, x="Brand", y="Ratings", color="Brand",
-                  color_discrete_sequence=COLORS, points="all")
+                  color_discrete_sequence=COLORS, points="all",
+                  category_orders={"Brand": brand_order_rating})
     fig2.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
                        height=320, paper_bgcolor="rgba(0,0,0,0)",
                        plot_bgcolor="rgba(0,0,0,0)",
@@ -174,8 +176,10 @@ c3, c4 = st.columns([1,1])
 
 with c3:
     st.markdown('<p class="section-title">Price positioning by brand</p>', unsafe_allow_html=True)
+    brand_order_price = df.groupby("Brand")["Price"].median().sort_values(ascending=False).index.tolist()
     fig3 = px.violin(df, x="Brand", y="Price", color="Brand",
-                     color_discrete_sequence=COLORS, box=True, points="all")
+                     color_discrete_sequence=COLORS, box=True, points="all",
+                     category_orders={"Brand": brand_order_price})
     fig3.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
                        height=340, paper_bgcolor="rgba(0,0,0,0)",
                        plot_bgcolor="rgba(0,0,0,0)",
@@ -211,10 +215,12 @@ st.markdown('<p class="section-title">Search ranking by brand — who wins page 
 if "Ranking" in df.columns and df["Ranking"].notna().sum() > 0:
     rank_df = df.groupby("Brand")["Ranking"].agg(["mean","min","count"]).reset_index()
     rank_df.columns = ["Brand","Avg Rank","Best Rank","Products"]
-    rank_df = rank_df.sort_values("Avg Rank")
+    best = rank_df.loc[rank_df["Avg Rank"].idxmin()]          # best rank = lowest number
+    rank_df = rank_df.sort_values("Avg Rank", ascending=False) # tallest bar first (descending)
     fig5 = px.bar(rank_df, x="Brand", y="Avg Rank", color="Brand",
                   color_discrete_sequence=COLORS, text="Avg Rank",
-                  hover_data=["Best Rank","Products"])
+                  hover_data=["Best Rank","Products"],
+                  category_orders={"Brand": rank_df["Brand"].tolist()})
     fig5.update_traces(texttemplate="%{text:.1f}", textposition="outside")
     fig5.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
                        height=320, paper_bgcolor="rgba(0,0,0,0)",
@@ -223,7 +229,6 @@ if "Ranking" in df.columns and df["Ranking"].notna().sum() > 0:
                                   title="Avg ranking position (lower = better)"),
                        xaxis_title="")
     st.plotly_chart(fig5, use_container_width=True)
-    best = rank_df.iloc[0]
     st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
 else:
     st.info("No Ranking data available.")
@@ -238,6 +243,9 @@ c7, c9 = st.columns([1,1])
 with c7:
     st.markdown('<p class="section-title">Brand × category presence heatmap</p>', unsafe_allow_html=True)
     heatmap_df = df.groupby(["Brand","Subcategory"]).size().unstack(fill_value=0)
+    row_order = heatmap_df.sum(axis=1).sort_values(ascending=False).index
+    col_order = heatmap_df.sum(axis=0).sort_values(ascending=False).index
+    heatmap_df = heatmap_df.loc[row_order, col_order]
     fig7 = px.imshow(heatmap_df, color_continuous_scale="Greens",
                      text_auto=True, aspect="auto")
     fig7.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
@@ -267,9 +275,11 @@ with c9:
     )
 
     tier_df = df.groupby(["Tier","Brand"]).size().reset_index(name="Count")
+    tier_totals = tier_df.groupby("Tier")["Count"].sum().sort_values(ascending=False)
+    tier_order_sorted = tier_totals.index.tolist()
     fig9 = px.bar(tier_df, x="Tier", y="Count", color="Brand",
                   color_discrete_sequence=COLORS,
-                  category_orders={"Tier": tier_order})
+                  category_orders={"Tier": tier_order_sorted})
     fig9.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
                        paper_bgcolor="rgba(0,0,0,0)",
                        plot_bgcolor="rgba(0,0,0,0)",
