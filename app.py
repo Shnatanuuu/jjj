@@ -375,9 +375,12 @@ def color_rating(val):
     elif val >= 3.5: return "background-color:#FAEEDA;color:#633806"
     else: return "background-color:#FCEBEB;color:#791F1F"
 
+try:
+    styled = top10.style.map(color_rating, subset=["Ratings"])
+except AttributeError:
+    styled = top10.style.applymap(color_rating, subset=["Ratings"])
 st.dataframe(
-    top10.style.applymap(color_rating, subset=["Ratings"])
-         .format({"Price":"HK${:.1f}","Ratings":"{:.1f}"}),
+    styled.format({"Price":"HK${:.1f}","Ratings":"{:.1f}"}),
     use_container_width=True, height=420
 )
 
