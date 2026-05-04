@@ -130,23 +130,6 @@ if df.empty:
     st.warning("No data matches your filters.")
     st.stop()
 
-# ── KPI row ───────────────────────────────────────────────────────────────────
-k1,k2,k3,k4,k5 = st.columns(5)
-kpis = [
-    (k1, len(df["Brand"].unique()), "Brands tracked"),
-    (k2, len(df["Subcategory"].unique()), "Subcategories"),
-    (k3, f"HK${df['Price'].median():,.0f}", "Median price"),
-    (k4, f"{df['Ratings'].mean():.2f} ★", "Avg rating"),
-    (k5, f"{(df['Campaign_Has']=='Has Campaign').sum()}", "Promoted products"),
-]
-for col, val, lbl in kpis:
-    col.markdown(f"""<div class="metric-card">
-        <p class="metric-value">{val}</p>
-        <p class="metric-label">{lbl}</p>
-    </div>""", unsafe_allow_html=True)
-
-st.markdown("---")
-
 # ════════════════════════════════════════════════════════════════════════════
 # ROW 1 — Share of shelf + Rating distribution
 # ════════════════════════════════════════════════════════════════════════════
@@ -222,55 +205,35 @@ with c4:
 st.markdown("---")
 
 # ════════════════════════════════════════════════════════════════════════════
-# ROW 3 — Search ranking analysis + Campaign impact
+# ROW 3 — Search ranking analysis (full width)
 # ════════════════════════════════════════════════════════════════════════════
-c5, c6 = st.columns([1,1])
-
-with c5:
-    st.markdown('<p class="section-title">Search ranking by brand — who wins page 1?</p>', unsafe_allow_html=True)
-    if "Ranking" in df.columns and df["Ranking"].notna().sum() > 0:
-        rank_df = df.groupby("Brand")["Ranking"].agg(["mean","min","count"]).reset_index()
-        rank_df.columns = ["Brand","Avg Rank","Best Rank","Products"]
-        rank_df = rank_df.sort_values("Avg Rank")
-        fig5 = px.bar(rank_df, x="Brand", y="Avg Rank", color="Brand",
-                      color_discrete_sequence=COLORS, text="Avg Rank",
-                      hover_data=["Best Rank","Products"])
-        fig5.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-        fig5.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
-                           height=320, paper_bgcolor="rgba(0,0,0,0)",
-                           plot_bgcolor="rgba(0,0,0,0)",
-                           yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
-                                      title="Avg ranking position (lower = better)"),
-                           xaxis_title="")
-        st.plotly_chart(fig5, use_container_width=True)
-        best = rank_df.iloc[0]
-        st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
-    else:
-        st.info("No Ranking data available.")
-
-with c6:
-    st.markdown('<p class="section-title">Campaign type — discount strategy breakdown</p>', unsafe_allow_html=True)
-    camp_df = df.groupby(["Brand","Campaign_Has"]).size().reset_index(name="Count")
-    fig6 = px.bar(camp_df, x="Brand", y="Count", color="Campaign_Has",
-                  barmode="group", color_discrete_map={
-                      "Has Campaign":"#1D9E75","No Campaign":"#D5CFC6"},
-                  text="Count")
-    fig6.update_traces(textposition="outside")
-    fig6.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
-                       paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                       yaxis=dict(gridcolor="#E8E4DE", title="Product count"),
-                       xaxis_title="", legend_title="",
-                       legend=dict(orientation="h", yanchor="bottom", y=1.01))
-    st.plotly_chart(fig6, use_container_width=True)
-    promo_pct = (df["Campaign_Has"]=="Has Campaign").mean() * 100
-    st.markdown(f'<div class="insight-box">🎯 <b>{promo_pct:.0f}%</b> of listed products run a campaign/discount. If your products have no campaign, you\'re at a visibility disadvantage in Zalora\'s algorithm.</div>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Search ranking by brand — who wins page 1?</p>', unsafe_allow_html=True)
+if "Ranking" in df.columns and df["Ranking"].notna().sum() > 0:
+    rank_df = df.groupby("Brand")["Ranking"].agg(["mean","min","count"]).reset_index()
+    rank_df.columns = ["Brand","Avg Rank","Best Rank","Products"]
+    rank_df = rank_df.sort_values("Avg Rank")
+    fig5 = px.bar(rank_df, x="Brand", y="Avg Rank", color="Brand",
+                  color_discrete_sequence=COLORS, text="Avg Rank",
+                  hover_data=["Best Rank","Products"])
+    fig5.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+    fig5.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
+                       height=320, paper_bgcolor="rgba(0,0,0,0)",
+                       plot_bgcolor="rgba(0,0,0,0)",
+                       yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
+                                  title="Avg ranking position (lower = better)"),
+                       xaxis_title="")
+    st.plotly_chart(fig5, use_container_width=True)
+    best = rank_df.iloc[0]
+    st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
+else:
+    st.info("No Ranking data available.")
 
 st.markdown("---")
 
 # ════════════════════════════════════════════════════════════════════════════
-# ROW 4 — Category heatmap + Rating vs Ranking
+# ROW 4 — Category heatmap + Price tier analysis
 # ════════════════════════════════════════════════════════════════════════════
-c7, c8 = st.columns([1,1])
+c7, c9 = st.columns([1,1])
 
 with c7:
     st.markdown('<p class="section-title">Brand × category presence heatmap</p>', unsafe_allow_html=True)
@@ -285,35 +248,8 @@ with c7:
     st.plotly_chart(fig7, use_container_width=True)
     st.markdown('<div class="insight-box">📊 Dark cells = dominant brand-category combinations. White/empty cells = gaps your brand can enter with less competition.</div>', unsafe_allow_html=True)
 
-with c8:
-    st.markdown('<p class="section-title">Does higher rating = better ranking?</p>', unsafe_allow_html=True)
-    if "Ranking" in df.columns and df["Ranking"].notna().sum() > 0:
-        fig8 = px.scatter(df, x="Ratings", y="Ranking", color="Brand",
-                          size="Price", size_max=20,
-                          hover_data=["Title","Brand","Price"],
-                          color_discrete_sequence=COLORS,
-                          trendline="ols")
-        fig8.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
-                           paper_bgcolor="rgba(0,0,0,0)",
-                           plot_bgcolor="rgba(0,0,0,0)",
-                           yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
-                                      title="Ranking (1 = top)"),
-                           xaxis=dict(gridcolor="#E8E4DE", title="Rating"),
-                           legend=dict(orientation="h", yanchor="bottom", y=1.01))
-        st.plotly_chart(fig8, use_container_width=True)
-        st.markdown('<div class="warn-box">💡 If the trendline slopes down-left, ratings alone don\'t drive ranking — campaigns and price also matter. Use this to calibrate your optimisation priority.</div>', unsafe_allow_html=True)
-    else:
-        st.info("No Ranking data available.")
-
-st.markdown("---")
-
-# ════════════════════════════════════════════════════════════════════════════
-# ROW 5 — Price tier analysis + Avg price per subcategory
-# ════════════════════════════════════════════════════════════════════════════
-c9, c10 = st.columns([1,1])
-
 with c9:
-    st.markdown('<p class="section-title">Price tier distribution — where is the crowd?</p>', unsafe_allow_html=True)
+    # Compute price tiers
     q1, q3 = df["Price"].quantile(0.25), df["Price"].quantile(0.75)
     def tier(p):
         if p <= q1: return "Budget"
@@ -321,11 +257,19 @@ with c9:
         else: return "Premium"
     df["Tier"] = df["Price"].apply(tier)
     tier_order = ["Budget","Mid-market","Premium"]
-    tier_colors = {"Budget":"#1D9E75","Mid-market":"#BA7517","Premium":"#185FA5"}
+
+    st.markdown(
+        f'<p class="section-title">Price tier distribution — where is the crowd?'
+        f'&nbsp;<span style="font-weight:400;font-size:12px;color:#6B6B6B;">'
+        f'Budget ≤ HK${q1:,.0f} &nbsp;|&nbsp; Mid-market HK${q1:,.0f}–HK${q3:,.0f} &nbsp;|&nbsp; Premium > HK${q3:,.0f}'
+        f'</span></p>',
+        unsafe_allow_html=True
+    )
+
     tier_df = df.groupby(["Tier","Brand"]).size().reset_index(name="Count")
     fig9 = px.bar(tier_df, x="Tier", y="Count", color="Brand",
                   color_discrete_sequence=COLORS,
-                  category_orders={"Tier":tier_order})
+                  category_orders={"Tier": tier_order})
     fig9.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
                        paper_bgcolor="rgba(0,0,0,0)",
                        plot_bgcolor="rgba(0,0,0,0)",
@@ -334,36 +278,10 @@ with c9:
                        legend=dict(orientation="h", yanchor="bottom", y=1.01))
     st.plotly_chart(fig9, use_container_width=True)
 
-with c10:
-    st.markdown('<p class="section-title">Average price by subcategory</p>', unsafe_allow_html=True)
-    sub_price = df.groupby("Subcategory")["Price"].agg(["mean","min","max","count"]).reset_index()
-    sub_price.columns = ["Subcategory","Avg","Min","Max","Count"]
-    sub_price = sub_price.sort_values("Avg", ascending=True)
-    fig10 = go.Figure()
-    fig10.add_trace(go.Bar(
-        y=sub_price["Subcategory"], x=sub_price["Avg"],
-        orientation="h", marker_color=COLORS[:len(sub_price)],
-        text=[f"HK${v:,.0f}" for v in sub_price["Avg"]],
-        textposition="outside",
-        error_x=dict(
-            type="data",
-            array=(sub_price["Max"]-sub_price["Avg"]).tolist(),
-            arrayminus=(sub_price["Avg"]-sub_price["Min"]).tolist(),
-            visible=True, color="#AAAAAA"
-        )
-    ))
-    fig10.update_layout(margin=dict(t=10,b=10,l=0,r=80), height=320,
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        plot_bgcolor="rgba(0,0,0,0)",
-                        xaxis=dict(gridcolor="#E8E4DE", title="Price (HK$)"),
-                        yaxis_title="")
-    st.plotly_chart(fig10, use_container_width=True)
-    st.markdown('<div class="insight-box">📌 Error bars show price range per category. Wide bars = high price variance = room to position at multiple tiers within one category.</div>', unsafe_allow_html=True)
-
 st.markdown("---")
 
 # ════════════════════════════════════════════════════════════════════════════
-# ROW 6 — Top 10 products table
+# ROW 5 — Top 10 products table
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown('<p class="section-title">🏅 Top ranked products — your benchmark list</p>', unsafe_allow_html=True)
 show_cols = [c for c in ["Ranking","Brand","Title","Subcategory","Price","Ratings","Campaign_Type"] if c in df.columns]
