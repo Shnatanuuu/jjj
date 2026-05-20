@@ -45,25 +45,40 @@ st.markdown("""
         margin-top: 8px;
     }
     [data-testid="stSidebar"] { background: #F4F1ED; }
-    .export-row { display: flex; justify-content: flex-end; margin-top: 4px; margin-bottom: 8px; }
+    /* Icon-only export button */
+    div[data-testid="stDownloadButton"] button {
+        padding: 4px 8px !important;
+        font-size: 14px !important;
+        min-height: 0 !important;
+        height: 28px !important;
+        width: 28px !important;
+        border-radius: 6px !important;
+        background: #F4F1ED !important;
+        border: 1px solid #E8E4DE !important;
+        color: #1A1A1A !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 COLORS = ["#1D9E75","#E07B39","#185FA5","#BA7517","#7B3FA0","#C23B5A","#2B8C9B","#8B7355"]
 
 # ── CSV export helper ─────────────────────────────────────────────────────────
-def export_csv(df_export: pd.DataFrame, label: str, filename: str):
-    """Render a small right-aligned CSV download button."""
+# Use a stable counter stored in session_state so keys never change on re-run
+if "dl_counter" not in st.session_state:
+    st.session_state["dl_counter"] = 0
+
+def export_csv(df_export: pd.DataFrame, filename: str):
+    """Render a small right-aligned icon-only CSV download button."""
     csv_bytes = df_export.to_csv(index=False).encode("utf-8-sig")
-    _, btn_col = st.columns([6, 1])
+    _, btn_col = st.columns([12, 1])
     with btn_col:
         st.download_button(
-            label=f"⬇ Export CSV",
+            label="⬇",
             data=csv_bytes,
             file_name=filename,
             mime="text/csv",
-            key=f"dl_{filename}_{label}",
-            use_container_width=True,
+            key=f"dl_{filename}",   # stable key — same file, same key every run
+            use_container_width=False,
         )
 
 # ── Sample data ───────────────────────────────────────────────────────────────
@@ -131,7 +146,7 @@ with st.sidebar:
         lambda x: "Has Campaign" if pd.notna(x) and str(x).strip() not in ["","No campaign","nan"] else "No Campaign"
     )
 
-    # ── Filters — applied to ALL tabs ────────────────────────────────────────
+    # ── Filters ───────────────────────────────────────────────────────────────
     st.markdown("**Filters**")
     cats = ["All"] + sorted(df_all["Subcategory"].dropna().unique().tolist())
     sel_cat = st.selectbox("Subcategory", cats)
@@ -193,18 +208,20 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
         top = shelf.iloc[0]
         st.markdown(f'<div class="insight-box">🏆 <b>{top.Brand}</b> owns <b>{top.Share}%</b> of shelf space — the brand you need to displace or differentiate from.</div>', unsafe_allow_html=True)
-        export_csv(shelf[["Brand","Count","Share"]], "shelf", "share_of_shelf.csv")
+        export_csv(shelf[["Brand","Count","Share"]], "share_of_shelf.csv")
 
     with c2:
         st.markdown('<p class="section-title">Rating distribution by brand</p>', unsafe_allow_html=True)
-        brand_order_rating = df.groupby("Brand")["Ratings"].mean().sort_values(ascending=False).index.tolist()
+        # Sort brands alphabetically so x-axis reads left-to-right naturally
+        brand_order_rating = sorted(df["Brand"].unique().tolist())
         fig2 = px.box(df, x="Brand", y="Ratings", color="Brand",
                       color_discrete_sequence=COLORS, points="all",
                       category_orders={"Brand": brand_order_rating})
-        fig2.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
+        fig2.update_layout(showlegend=False, margin=dict(t=10,b=60,l=0,r=0),
                            height=320, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(range=[0,5.5], gridcolor="#E8E4DE"),
+                           xaxis=dict(tickangle=0),   # upright labels
                            xaxis_title="", yaxis_title="Rating")
         fig2.update_traces(marker_size=6)
         st.plotly_chart(fig2, use_container_width=True)
@@ -212,7 +229,7 @@ with tab1:
         st.markdown(f'<div class="warn-box">⚠️ <b>{low_brand}</b> has the lowest average rating — their unhappy customers are your acquisition opportunity.</div>', unsafe_allow_html=True)
         rating_summary = df.groupby("Brand")["Ratings"].agg(["mean","min","max","count"]).round(2).reset_index()
         rating_summary.columns = ["Brand","Avg_Rating","Min_Rating","Max_Rating","Products"]
-        export_csv(rating_summary, "ratings", "rating_distribution.csv")
+        export_csv(rating_summary, "rating_distribution.csv")
 
     st.markdown("---")
 
@@ -221,19 +238,20 @@ with tab1:
 
     with c3:
         st.markdown('<p class="section-title">Price positioning by brand</p>', unsafe_allow_html=True)
-        brand_order_price = df.groupby("Brand")["Price"].median().sort_values(ascending=False).index.tolist()
+        brand_order_price = sorted(df["Brand"].unique().tolist())
         fig3 = px.violin(df, x="Brand", y="Price", color="Brand",
                          color_discrete_sequence=COLORS, box=True, points="all",
                          category_orders={"Brand": brand_order_price})
-        fig3.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
+        fig3.update_layout(showlegend=False, margin=dict(t=10,b=60,l=0,r=0),
                            height=340, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(gridcolor="#E8E4DE"),
+                           xaxis=dict(tickangle=0),   # upright labels
                            xaxis_title="", yaxis_title="Price (HK$)")
         st.plotly_chart(fig3, use_container_width=True)
         price_summary = df.groupby("Brand")["Price"].agg(["median","mean","min","max","count"]).round(1).reset_index()
         price_summary.columns = ["Brand","Median_Price","Avg_Price","Min_Price","Max_Price","Products"]
-        export_csv(price_summary, "price_pos", "price_positioning.csv")
+        export_csv(price_summary, "price_positioning.csv")
 
     with c4:
         st.markdown('<p class="section-title">Price vs rating — where is the value gap?</p>', unsafe_allow_html=True)
@@ -254,7 +272,7 @@ with tab1:
         st.plotly_chart(fig4, use_container_width=True)
         st.markdown('<div class="insight-box">💡 Products in the <b>top-left quadrant</b> (high rating, low price) are your biggest competitive threats. Top-right = premium sweet spot to aspire to.</div>', unsafe_allow_html=True)
         scatter_export = df[["Brand","Title","Subcategory","Price","Ratings","Ranking"]].copy()
-        export_csv(scatter_export, "price_vs_rating", "price_vs_rating.csv")
+        export_csv(scatter_export, "price_vs_rating.csv")
 
     st.markdown("---")
 
@@ -270,15 +288,16 @@ with tab1:
                       hover_data=["Best Rank","Products"],
                       category_orders={"Brand": rank_df["Brand"].tolist()})
         fig5.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-        fig5.update_layout(showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
+        fig5.update_layout(showlegend=False, margin=dict(t=10,b=60,l=0,r=0),
                            height=320, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
                                       title="Avg ranking position (lower = better)"),
+                           xaxis=dict(tickangle=0),   # upright labels
                            xaxis_title="")
         st.plotly_chart(fig5, use_container_width=True)
         st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
-        export_csv(rank_df.reset_index(drop=True), "ranking", "search_ranking.csv")
+        export_csv(rank_df.reset_index(drop=True), "search_ranking.csv")
     else:
         st.info("No Ranking data available.")
 
@@ -296,12 +315,13 @@ with tab1:
         fig7 = px.imshow(heatmap_df, color_continuous_scale="Greens", text_auto=True, aspect="auto")
         fig7.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
                            paper_bgcolor="rgba(0,0,0,0)",
-                           coloraxis_showscale=False, xaxis_title="", yaxis_title="")
+                           coloraxis_showscale=False, xaxis_title="", yaxis_title="",
+                           xaxis=dict(tickangle=0))
         fig7.update_traces(textfont_size=13)
         st.plotly_chart(fig7, use_container_width=True)
         st.markdown('<div class="insight-box">📊 Dark cells = dominant brand-category combinations. White/empty cells = gaps your brand can enter with less competition.</div>', unsafe_allow_html=True)
         heatmap_export = heatmap_df.reset_index()
-        export_csv(heatmap_export, "presence_heatmap", "brand_category_presence.csv")
+        export_csv(heatmap_export, "brand_category_presence.csv")
 
     with c9:
         q1, q3 = df["Price"].quantile(0.25), df["Price"].quantile(0.75)
@@ -327,10 +347,11 @@ with tab1:
         fig9.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
                            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(gridcolor="#E8E4DE", title="Products"),
+                           xaxis=dict(tickangle=0),
                            xaxis_title="",
                            legend=dict(orientation="h", yanchor="bottom", y=1.01))
         st.plotly_chart(fig9, use_container_width=True)
-        export_csv(tier_df, "price_tier", "price_tier_distribution.csv")
+        export_csv(tier_df, "price_tier_distribution.csv")
 
     st.markdown("---")
 
@@ -357,23 +378,21 @@ with tab1:
     tbl_height = min(1400, max(400, n_products * 120 + 40))
     st.dataframe(all_products, column_config=col_cfg, use_container_width=True, height=tbl_height, row_height=120)
 
-    # Export excludes image column
     export_cols = [c for c in show_cols if c != "Image_src"]
-    export_csv(df.sort_values("Ranking", na_position="last")[export_cols].reset_index(drop=True), "products_table", "all_ranked_products.csv")
+    export_csv(df.sort_values("Ranking", na_position="last")[export_cols].reset_index(drop=True), "all_ranked_products.csv")
 
     st.markdown("---")
     st.markdown('<p style="font-size:12px;color:#888">Built for Zalora competitive intelligence · Upload fresh scraped data weekly for trend tracking</p>', unsafe_allow_html=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Category × Brand Pricing Matrix  (NOW filtered by sidebar)
+# TAB 2 — Category × Brand Pricing Matrix
 # ════════════════════════════════════════════════════════════════════════════
 with tab2:
     st.markdown("## 📁 Category × Brand Average Price Matrix")
     st.markdown("Filtered by the sidebar — select **All** in Subcategory and all brands to see the full picture.")
     st.markdown("---")
 
-    # ── Grouped avg price table (uses filtered df) ────────────────────────────
     grp = (
         df.groupby(["Subcategory","Brand"])
         .agg(
@@ -386,7 +405,6 @@ with tab2:
     grp["Avg_Price"] = grp["Avg_Price"].round(1)
     grp["Avg_Rating"] = grp["Avg_Rating"].round(2)
 
-    # ── Pivot for heatmap ─────────────────────────────────────────────────────
     pivot = grp.pivot_table(index="Brand", columns="Subcategory", values="Avg_Price", aggfunc="mean")
     pivot = pivot.round(1)
     pivot = pivot.loc[pivot.mean(axis=1).sort_values(ascending=False).index]
@@ -401,17 +419,15 @@ with tab2:
         labels=dict(color="Avg Price (HK$)"),
     )
     fig_heat.update_layout(
-        # Push top margin to give room for x-axis labels on top
         margin=dict(t=80, b=10, l=0, r=10),
         height=max(300, len(pivot) * 60),
         paper_bgcolor="rgba(0,0,0,0)",
         xaxis_title="",
         yaxis_title="",
         coloraxis_colorbar=dict(title="HK$"),
-        # Move x-axis ticks/labels to the top
         xaxis=dict(
             side="top",
-            tickangle=-30,
+            tickangle=0,      # ← upright, not slanted
             tickfont=dict(size=12),
         ),
     )
@@ -419,12 +435,10 @@ with tab2:
     st.plotly_chart(fig_heat, use_container_width=True)
     st.markdown('<div class="insight-box">🟥 Red = higher avg price in that cell &nbsp;|&nbsp; 🟩 Green = lower avg price. Use this to spot where competitors price aggressively in specific categories.</div>', unsafe_allow_html=True)
 
-    # Export heatmap as long-form
-    export_csv(grp, "price_heatmap", "avg_price_heatmap.csv")
+    export_csv(grp, "avg_price_heatmap.csv")
 
     st.markdown("---")
 
-    # ── Flat detail table ─────────────────────────────────────────────────────
     st.markdown('<p class="section-title">Full detail — subcategory × brand breakdown</p>', unsafe_allow_html=True)
     grp_display = grp.sort_values(["Subcategory","Avg_Price"], ascending=[True, False]).reset_index(drop=True)
     grp_display.index += 1
@@ -441,7 +455,7 @@ with tab2:
         use_container_width=True,
         height=500,
     )
-    export_csv(grp_display.reset_index(drop=True), "price_detail", "subcategory_brand_detail.csv")
+    export_csv(grp_display.reset_index(drop=True), "subcategory_brand_detail.csv")
 
     st.markdown("---")
     st.markdown('<p style="font-size:12px;color:#888">Filtered by sidebar selections. Select All to see full dataset.</p>', unsafe_allow_html=True)
@@ -452,7 +466,7 @@ with tab2:
 # ════════════════════════════════════════════════════════════════════════════
 with tab3:
     st.markdown("## 🏷️ Brand Scorecard")
-    st.markdown("A single table summarising every brand's competitive position across all key metrics. Use it to rank threats and spot weaknesses.")
+    st.markdown("A single table summarising every brand's competitive position across all key metrics.")
     st.markdown("---")
 
     sc = df.groupby("Brand").agg(
@@ -503,11 +517,10 @@ with tab3:
         use_container_width=True,
         height=450,
     )
-    export_csv(sc.reset_index(drop=True), "scorecard", "brand_scorecard.csv")
+    export_csv(sc.reset_index(drop=True), "brand_scorecard.csv")
 
     st.markdown("---")
 
-    # ── Radar chart ───────────────────────────────────────────────────────────
     st.markdown('<p class="section-title">Brand radar — normalised performance comparison</p>', unsafe_allow_html=True)
     st.caption("Each axis is min-max normalised (higher = better). Ranking and Price are inverted so lower numbers score higher.")
 
@@ -542,10 +555,9 @@ with tab3:
     )
     st.plotly_chart(fig_radar, use_container_width=True)
 
-    # Radar export — normalised scores
-    radar_export = radar_df[["Brand"] + ["Avg_Rating","Campaign_Coverage_%","Categories","Avg_Ranking","Avg_Price"]].copy()
+    radar_export = radar_df[["Brand","Avg_Rating","Campaign_Coverage_%","Categories","Avg_Ranking","Avg_Price"]].copy()
     radar_export.columns = ["Brand","Norm_Avg_Rating","Norm_Campaign_Coverage","Norm_Category_Width","Norm_Ranking_Strength","Norm_Price_Competitiveness"]
-    export_csv(radar_export, "radar", "brand_radar_scores.csv")
+    export_csv(radar_export, "brand_radar_scores.csv")
 
     st.markdown("---")
     st.markdown('<p style="font-size:12px;color:#888">Filtered by sidebar selections.</p>', unsafe_allow_html=True)
@@ -559,7 +571,6 @@ with tab4:
     st.markdown("Understand which campaign types are driving shelf presence, and how discounting correlates with ratings and price.")
     st.markdown("---")
 
-    # ── Campaign type summary table ───────────────────────────────────────────
     st.markdown('<p class="section-title">Campaign type breakdown — who is discounting, and how?</p>', unsafe_allow_html=True)
 
     camp_summary = (
@@ -597,11 +608,10 @@ with tab4:
         use_container_width=True,
         height=380,
     )
-    export_csv(camp_summary.reset_index(drop=True), "camp_summary", "campaign_type_breakdown.csv")
+    export_csv(camp_summary.reset_index(drop=True), "campaign_type_breakdown.csv")
 
     st.markdown("---")
 
-    # ── Campaign coverage per brand bar chart ─────────────────────────────────
     st.markdown('<p class="section-title">Campaign coverage by brand — who is running the most promotions?</p>', unsafe_allow_html=True)
 
     camp_brand = df.groupby(["Brand","Campaign_Has"]).size().reset_index(name="Count")
@@ -615,9 +625,10 @@ with tab4:
     )
     fig_camp.update_traces(texttemplate="%{text:.0f}%", textposition="inside")
     fig_camp.update_layout(
-        height=340, margin=dict(t=10,b=10,l=0,r=0),
+        height=340, margin=dict(t=10,b=60,l=0,r=0),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         yaxis=dict(title="% of products", gridcolor="#E8E4DE"),
+        xaxis=dict(tickangle=0),   # upright
         xaxis_title="",
         legend=dict(orientation="h", yanchor="bottom", y=1.01, title=""),
         showlegend=True,
@@ -631,11 +642,10 @@ with tab4:
         .idxmax()
     )
     st.markdown(f'<div class="insight-box">📣 <b>{top_camp_brand}</b> has the highest campaign coverage among its products — they are the most aggressive promoter on shelf.</div>', unsafe_allow_html=True)
-    export_csv(camp_brand, "camp_brand_coverage", "campaign_coverage_by_brand.csv")
+    export_csv(camp_brand, "campaign_coverage_by_brand.csv")
 
     st.markdown("---")
 
-    # ── Campaign vs No Campaign avg rating comparison ─────────────────────────
     st.markdown('<p class="section-title">Does running a campaign correlate with higher ratings?</p>', unsafe_allow_html=True)
 
     camp_rating = df.groupby("Campaign_Has")["Ratings"].mean().reset_index()
@@ -651,10 +661,11 @@ with tab4:
         height=300, showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         yaxis=dict(range=[0,6], gridcolor="#E8E4DE", title="Avg Rating"),
+        xaxis=dict(tickangle=0),
         xaxis_title="",
     )
     st.plotly_chart(fig_cr, use_container_width=True)
-    export_csv(camp_rating, "camp_rating", "campaign_vs_rating.csv")
+    export_csv(camp_rating, "campaign_vs_rating.csv")
 
     st.markdown("---")
     st.markdown('<p style="font-size:12px;color:#888">Filtered by sidebar selections.</p>', unsafe_allow_html=True)
