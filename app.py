@@ -217,11 +217,11 @@ with tab1:
         fig2 = px.box(df, x="Brand", y="Ratings", color="Brand",
                       color_discrete_sequence=COLORS, points="all",
                       category_orders={"Brand": brand_order_rating})
-        fig2.update_layout(showlegend=False, margin=dict(t=10,b=60,l=0,r=0),
+        fig2.update_layout(showlegend=False, margin=dict(t=10,b=100,l=0,r=0),
                            height=320, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(range=[0,5.5], gridcolor="#E8E4DE"),
-                           xaxis=dict(tickangle=0),   # upright labels
+                           xaxis=dict(tickangle=-90),   # upright labels
                            xaxis_title="", yaxis_title="Rating")
         fig2.update_traces(marker_size=6)
         st.plotly_chart(fig2, use_container_width=True)
@@ -242,11 +242,11 @@ with tab1:
         fig3 = px.violin(df, x="Brand", y="Price", color="Brand",
                          color_discrete_sequence=COLORS, box=True, points="all",
                          category_orders={"Brand": brand_order_price})
-        fig3.update_layout(showlegend=False, margin=dict(t=10,b=60,l=0,r=0),
+        fig3.update_layout(showlegend=False, margin=dict(t=10,b=100,l=0,r=0),
                            height=340, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(gridcolor="#E8E4DE"),
-                           xaxis=dict(tickangle=0),   # upright labels
+                           xaxis=dict(tickangle=-90),   # upright labels
                            xaxis_title="", yaxis_title="Price (HK$)")
         st.plotly_chart(fig3, use_container_width=True)
         price_summary = df.groupby("Brand")["Price"].agg(["median","mean","min","max","count"]).round(1).reset_index()
@@ -288,12 +288,12 @@ with tab1:
                       hover_data=["Best Rank","Products"],
                       category_orders={"Brand": rank_df["Brand"].tolist()})
         fig5.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-        fig5.update_layout(showlegend=False, margin=dict(t=10,b=60,l=0,r=0),
+        fig5.update_layout(showlegend=False, margin=dict(t=10,b=100,l=0,r=0),
                            height=320, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
                                       title="Avg ranking position (lower = better)"),
-                           xaxis=dict(tickangle=0),   # upright labels
+                           xaxis=dict(tickangle=-90),   # upright labels
                            xaxis_title="")
         st.plotly_chart(fig5, use_container_width=True)
         st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
@@ -347,7 +347,7 @@ with tab1:
         fig9.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
                            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(gridcolor="#E8E4DE", title="Products"),
-                           xaxis=dict(tickangle=0),
+                           xaxis=dict(tickangle=-90),
                            xaxis_title="",
                            legend=dict(orientation="h", yanchor="bottom", y=1.01))
         st.plotly_chart(fig9, use_container_width=True)
@@ -625,10 +625,10 @@ with tab4:
     )
     fig_camp.update_traces(texttemplate="%{text:.0f}%", textposition="inside")
     fig_camp.update_layout(
-        height=340, margin=dict(t=10,b=60,l=0,r=0),
+        height=340, margin=dict(t=10,b=100,l=0,r=0),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         yaxis=dict(title="% of products", gridcolor="#E8E4DE"),
-        xaxis=dict(tickangle=0),   # upright
+        xaxis=dict(tickangle=-90),   # upright
         xaxis_title="",
         legend=dict(orientation="h", yanchor="bottom", y=1.01, title=""),
         showlegend=True,
@@ -661,7 +661,7 @@ with tab4:
         height=300, showlegend=False, margin=dict(t=10,b=10,l=0,r=0),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         yaxis=dict(range=[0,6], gridcolor="#E8E4DE", title="Avg Rating"),
-        xaxis=dict(tickangle=0),
+        xaxis=dict(tickangle=-90),
         xaxis_title="",
     )
     st.plotly_chart(fig_cr, use_container_width=True)
