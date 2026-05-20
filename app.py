@@ -207,6 +207,7 @@ with tab1:
                            yaxis=dict(range=[0,5.5], gridcolor="#E8E4DE"),
                            xaxis_title="", yaxis_title="Rating")
         fig2.update_traces(marker_size=6)
+        fig2.update_xaxes(tickangle=-90)   # ← vertical labels
         st.plotly_chart(fig2, use_container_width=True)
         low_brand = df.groupby("Brand")["Ratings"].mean().idxmin()
         st.markdown(f'<div class="warn-box">⚠️ <b>{low_brand}</b> has the lowest average rating — their unhappy customers are your acquisition opportunity.</div>', unsafe_allow_html=True)
@@ -230,6 +231,7 @@ with tab1:
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(gridcolor="#E8E4DE"),
                            xaxis_title="", yaxis_title="Price (HK$)")
+        fig3.update_xaxes(tickangle=-90)   # ← vertical labels
         st.plotly_chart(fig3, use_container_width=True)
         price_summary = df.groupby("Brand")["Price"].agg(["median","mean","min","max","count"]).round(1).reset_index()
         price_summary.columns = ["Brand","Median_Price","Avg_Price","Min_Price","Max_Price","Products"]
@@ -276,6 +278,7 @@ with tab1:
                            yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
                                       title="Avg ranking position (lower = better)"),
                            xaxis_title="")
+        fig5.update_xaxes(tickangle=-90)   # ← vertical labels
         st.plotly_chart(fig5, use_container_width=True)
         st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
         export_csv(rank_df.reset_index(drop=True), "ranking", "search_ranking.csv")
@@ -298,6 +301,7 @@ with tab1:
                            paper_bgcolor="rgba(0,0,0,0)",
                            coloraxis_showscale=False, xaxis_title="", yaxis_title="")
         fig7.update_traces(textfont_size=13)
+        fig7.update_xaxes(tickangle=-90)   # ← vertical labels
         st.plotly_chart(fig7, use_container_width=True)
         st.markdown('<div class="insight-box">📊 Dark cells = dominant brand-category combinations. White/empty cells = gaps your brand can enter with less competition.</div>', unsafe_allow_html=True)
         heatmap_export = heatmap_df.reset_index()
@@ -329,6 +333,7 @@ with tab1:
                            yaxis=dict(gridcolor="#E8E4DE", title="Products"),
                            xaxis_title="",
                            legend=dict(orientation="h", yanchor="bottom", y=1.01))
+        fig9.update_xaxes(tickangle=-90)   # ← vertical labels
         st.plotly_chart(fig9, use_container_width=True)
         export_csv(tier_df, "price_tier", "price_tier_distribution.csv")
 
@@ -411,7 +416,7 @@ with tab2:
         # Move x-axis ticks/labels to the top
         xaxis=dict(
             side="top",
-            tickangle=-90,
+            tickangle=-90,          # already vertical
             tickfont=dict(size=12),
         ),
     )
@@ -622,6 +627,7 @@ with tab4:
         legend=dict(orientation="h", yanchor="bottom", y=1.01, title=""),
         showlegend=True,
     )
+    fig_camp.update_xaxes(tickangle=-90)   # ← vertical labels
     st.plotly_chart(fig_camp, use_container_width=True)
 
     top_camp_brand = (
@@ -653,6 +659,7 @@ with tab4:
         yaxis=dict(range=[0,6], gridcolor="#E8E4DE", title="Avg Rating"),
         xaxis_title="",
     )
+    fig_cr.update_xaxes(tickangle=-90)   # ← vertical labels
     st.plotly_chart(fig_cr, use_container_width=True)
     export_csv(camp_rating, "camp_rating", "campaign_vs_rating.csv")
 
