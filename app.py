@@ -318,12 +318,17 @@ with tab1:
 
     st.markdown("---")
 
-    # ── ROW 5 — Top ranked products table WITH IMAGES ─────────────────────────
-    st.markdown('<p class="section-title">🏅 Top ranked products — your benchmark list</p>', unsafe_allow_html=True)
+    # ── ROW 5 — All ranked products table WITH IMAGES ────────────────────────
+    n_products = len(df)
+    st.markdown(
+        f'<p class="section-title">🏅 All ranked products — your benchmark list'
+        f'&nbsp;<span style="font-weight:400;font-size:12px;color:#6B6B6B;">{n_products} SKUs · sorted by ranking</span></p>',
+        unsafe_allow_html=True,
+    )
 
     show_cols = [c for c in ["Ranking","Image_src","Brand","Title","Subcategory","Price","Ratings","Campaign_Type"] if c in df.columns]
-    top15 = df.sort_values("Ranking").head(15)[show_cols].reset_index(drop=True)
-    top15.index += 1
+    all_products = df.sort_values("Ranking", na_position="last")[show_cols].reset_index(drop=True)
+    all_products.index += 1
 
     # Build column_config dict
     col_cfg = {
@@ -331,16 +336,19 @@ with tab1:
         "Ratings": st.column_config.NumberColumn("Ratings ⭐", format="%.1f"),
         "Ranking": st.column_config.NumberColumn("Rank #", format="%d"),
     }
-    if "Image_src" in top15.columns:
+    if "Image_src" in all_products.columns:
         col_cfg["Image_src"] = st.column_config.ImageColumn(
             "Preview", help="Product thumbnail from retailer", width="small"
         )
 
+    # Dynamic height: 56px per row, min 400, max 900
+    tbl_height = min(900, max(400, n_products * 56 + 40))
+
     st.dataframe(
-        top15,
+        all_products,
         column_config=col_cfg,
         use_container_width=True,
-        height=500,
+        height=tbl_height,
     )
 
     st.markdown("---")
