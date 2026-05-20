@@ -316,7 +316,7 @@ with tab1:
         fig7.update_layout(margin=dict(t=10,b=10,l=0,r=0), height=320,
                            paper_bgcolor="rgba(0,0,0,0)",
                            coloraxis_showscale=False, xaxis_title="", yaxis_title="",
-                           xaxis=dict(tickangle=0))
+                           xaxis=dict(tickangle=-90))
         fig7.update_traces(textfont_size=13)
         st.plotly_chart(fig7, use_container_width=True)
         st.markdown('<div class="insight-box">📊 Dark cells = dominant brand-category combinations. White/empty cells = gaps your brand can enter with less competition.</div>', unsafe_allow_html=True)
@@ -427,7 +427,7 @@ with tab2:
         coloraxis_colorbar=dict(title="HK$"),
         xaxis=dict(
             side="top",
-            tickangle=0,      # ← upright, not slanted
+            tickangle=-90,      # ← upright, not slanted
             tickfont=dict(size=12),
         ),
     )
