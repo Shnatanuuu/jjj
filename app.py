@@ -99,6 +99,15 @@ with st.sidebar:
     # ── Clean ─────────────────────────────────────────────────────────────────
     df_all = df_raw.copy()
     df_all.columns = [c.strip() for c in df_all.columns]
+
+    # Normalise column names case-insensitively to canonical forms
+    CANONICAL = {
+        "subcategory": "Subcategory", "link": "Link", "ratings": "Ratings",
+        "image_src": "Image_src", "brand": "Brand", "title": "Title",
+        "price": "Price", "campaign_type": "Campaign_Type", "ranking": "Ranking",
+    }
+    df_all.rename(columns={c: CANONICAL.get(c.lower(), c) for c in df_all.columns}, inplace=True)
+
     for col in ["Ratings","Price","Ranking"]:
         if col in df_all.columns:
             df_all[col] = pd.to_numeric(df_all[col], errors="coerce")
@@ -155,11 +164,26 @@ with tab1:
         shelf["Share"] = (shelf["Count"] / shelf["Count"].sum() * 100).round(1)
         fig = px.pie(shelf, values="Count", names="Brand",
                      color_discrete_sequence=COLORS, hole=0.45)
-        fig.update_traces(textposition="outside", textinfo="label+percent",
-                          textfont_size=12, pull=[0.03]*len(shelf))
-        fig.update_layout(margin=dict(t=10,b=10,l=10,r=10), height=320,
-                          showlegend=False,
-                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        fig.update_traces(
+            textposition="inside",
+            textinfo="percent",
+            textfont=dict(size=13, color="white"),
+            insidetextorientation="horizontal",
+            pull=[0.03]*len(shelf),
+        )
+        fig.update_layout(
+            margin=dict(t=20, b=20, l=20, r=20),
+            height=340,
+            showlegend=True,
+            legend=dict(
+                orientation="v",
+                yanchor="middle", y=0.5,
+                xanchor="left", x=1.02,
+                font=dict(size=12),
+            ),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
         st.plotly_chart(fig, use_container_width=True)
         top = shelf.iloc[0]
         st.markdown(f'<div class="insight-box">🏆 <b>{top.Brand}</b> owns <b>{top.Share}%</b> of shelf space — the brand you need to displace or differentiate from.</div>', unsafe_allow_html=True)
@@ -303,20 +327,20 @@ with tab1:
 
     # Build column_config dict
     col_cfg = {
-        "Price": st.column_config.NumberColumn("Price (HK$)", format="HK$%.1f"),
+        "Price":   st.column_config.NumberColumn("Price (HK$)", format="HK$%.1f"),
         "Ratings": st.column_config.NumberColumn("Ratings ⭐", format="%.1f"),
         "Ranking": st.column_config.NumberColumn("Rank #", format="%d"),
     }
     if "Image_src" in top15.columns:
         col_cfg["Image_src"] = st.column_config.ImageColumn(
-            "Preview", help="Product image", width="small"
+            "Preview", help="Product thumbnail from retailer", width="small"
         )
 
     st.dataframe(
         top15,
         column_config=col_cfg,
         use_container_width=True,
-        height=460,
+        height=500,
     )
 
     st.markdown("---")
