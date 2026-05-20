@@ -149,9 +149,27 @@ with st.sidebar:
     # ── Filters ───────────────────────────────────────────────────────────────
     st.markdown("**Filters**")
     cats = sorted(df_all["Subcategory"].dropna().unique().tolist())
-    sel_cats = st.multiselect("Subcategory", cats, default=cats)
     brands = sorted(df_all["Brand"].dropna().unique().tolist())
-    sel_brands = st.multiselect("Brands", brands, default=brands)
+
+    # Subcategory filter with Select All / Clear All
+    ca, cb = st.columns(2)
+    if ca.button("✓ All", key="cat_all", use_container_width=True):
+        st.session_state["sel_cats"] = cats
+    if cb.button("✕ Clear", key="cat_clear", use_container_width=True):
+        st.session_state["sel_cats"] = []
+    if "sel_cats" not in st.session_state:
+        st.session_state["sel_cats"] = cats
+    sel_cats = st.multiselect("Subcategory", cats, key="sel_cats")
+
+    # Brand filter with Select All / Clear All
+    ba, bb = st.columns(2)
+    if ba.button("✓ All", key="brand_all", use_container_width=True):
+        st.session_state["sel_brands"] = brands
+    if bb.button("✕ Clear", key="brand_clear", use_container_width=True):
+        st.session_state["sel_brands"] = []
+    if "sel_brands" not in st.session_state:
+        st.session_state["sel_brands"] = brands
+    sel_brands = st.multiselect("Brands", brands, key="sel_brands")
 
     df = df_all.copy()
     if sel_cats:
