@@ -338,11 +338,11 @@ with tab1:
     }
     if "Image_src" in all_products.columns:
         col_cfg["Image_src"] = st.column_config.ImageColumn(
-            "Preview", help="Product thumbnail from retailer", width="small"
+            "Preview", help="Product thumbnail from retailer", width="large"
         )
 
-    # Dynamic height: 56px per row, min 400, max 900
-    tbl_height = min(900, max(400, n_products * 56 + 40))
+    # Dynamic height: 100px per row to accommodate large images, min 400, max 1200
+    tbl_height = min(1200, max(400, n_products * 100 + 40))
 
     st.dataframe(
         all_products,
