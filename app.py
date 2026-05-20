@@ -148,14 +148,14 @@ with st.sidebar:
 
     # ── Filters ───────────────────────────────────────────────────────────────
     st.markdown("**Filters**")
-    cats = ["All"] + sorted(df_all["Subcategory"].dropna().unique().tolist())
-    sel_cat = st.selectbox("Subcategory", cats)
+    cats = sorted(df_all["Subcategory"].dropna().unique().tolist())
+    sel_cats = st.multiselect("Subcategory", cats, default=cats)
     brands = sorted(df_all["Brand"].dropna().unique().tolist())
     sel_brands = st.multiselect("Brands", brands, default=brands)
 
     df = df_all.copy()
-    if sel_cat != "All":
-        df = df[df["Subcategory"] == sel_cat]
+    if sel_cats:
+        df = df[df["Subcategory"].isin(sel_cats)]
     if sel_brands:
         df = df[df["Brand"].isin(sel_brands)]
 
@@ -427,7 +427,7 @@ with tab2:
         coloraxis_colorbar=dict(title="HK$"),
         xaxis=dict(
             side="top",
-            tickangle=-90,      # ← upright, not slanted
+            tickangle=0,      # ← upright, not slanted
             tickfont=dict(size=12),
         ),
     )
