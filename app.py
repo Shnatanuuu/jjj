@@ -411,7 +411,7 @@ with tab2:
         # Move x-axis ticks/labels to the top
         xaxis=dict(
             side="top",
-            tickangle=-30,
+            tickangle=-90,
             tickfont=dict(size=12),
         ),
     )
