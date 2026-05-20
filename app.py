@@ -427,7 +427,7 @@ with tab2:
         coloraxis_colorbar=dict(title="HK$"),
         xaxis=dict(
             side="top",
-            tickangle=0,      # ← upright, not slanted
+            tickangle=-90,      # ← upright, not slanted
             tickfont=dict(size=12),
         ),
     )
