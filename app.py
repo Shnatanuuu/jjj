@@ -63,7 +63,6 @@ st.markdown("""
 COLORS = ["#1D9E75","#E07B39","#185FA5","#BA7517","#7B3FA0","#C23B5A","#2B8C9B","#8B7355"]
 
 # ── CSV export helper ─────────────────────────────────────────────────────────
-# Use a stable counter stored in session_state so keys never change on re-run
 if "dl_counter" not in st.session_state:
     st.session_state["dl_counter"] = 0
 
@@ -77,31 +76,31 @@ def export_csv(df_export: pd.DataFrame, filename: str):
             data=csv_bytes,
             file_name=filename,
             mime="text/csv",
-            key=f"dl_{filename}",   # stable key — same file, same key every run
+            key=f"dl_{filename}",
             use_container_width=False,
         )
 
 # ── Sample data ───────────────────────────────────────────────────────────────
-SAMPLE = """Subcategory\tLink\tRatings\tImage_src\tBrand\tTitle\tPrice\tCampaign_Type\tRanking
-Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-kelsey-stiletto-heel-6783657\t3\thttps://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=80\tFORCAST\tKelsey Stiletto Heel\t264.5\tX Pay HK$20 off\t1
-Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-kelsey-stiletto-heel-6783661\t3\thttps://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=80\tFORCAST\tKelsey Stiletto Heel\t264.5\tX Pay HK$20 off\t2
-Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-kelsey-leather-stiletto-heel-6783656\t4\thttps://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=80\tFORCAST\tKelsey Leather Stiletto Heel\t379.5\tX Pay HK$20 off\t3
-Stiletto Heels\thttps://www.zalora.com.hk/p/rag-co-microfiber-stiletto-sandals-in-taupe-7051748\t4.8\thttps://images.unsplash.com/photo-1596703263926-eb0762ee17e4?w=80\tRag & CO.\tMicrofiber Stiletto Sandals in Taupe\t188.3\t30% off\t4
-Stiletto Heels\thttps://www.zalora.com.hk/p/rag-co-suede-stiletto-mules-in-black-7081384\t5\thttps://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=80\tRag & CO.\tSuede Stiletto Mules In Black\t293.3\t30% off\t5
-Stiletto Heels\thttps://www.zalora.com.hk/p/twenty-eight-shoes-10cm-silk-6783456\t4.8\thttps://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=80\tTwenty Eight Shoes\t10CM Silk Fabrics Pointed High Heel Shoes\t431.1\t10% off\t6
-Stiletto Heels\thttps://www.zalora.com.hk/p/rag-co-patent-heel-7081390\t4.5\thttps://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=80\tRag & CO.\tPatent Leather Stiletto Pumps\t245.0\t30% off\t7
-Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-mini-stiletto-6783700\t3.5\thttps://images.unsplash.com/photo-1512361436605-a484bdb34b5f?w=80\tFORCAST\tMini Block Stiletto Heel\t199.0\tX Pay HK$20 off\t8
-Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-1\t5\thttps://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=80\tLondon Rag\tBlock Heel Chelsea Ankle Boots Black\t899.0\tNo campaign\t1
-Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-2\t5\thttps://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=80\tLondon Rag\tCroc Embossed Ankle Boots Nude\t1099.0\tNo campaign\t2
-Ankle Boots\thttps://www.zalora.com.hk/p/rag-co-ankle-1\t4.8\thttps://images.unsplash.com/photo-1542291026-7eec264c27ff?w=80\tRag & CO.\tSuede Effect Ankle Boots Tan\t1599.0\t15% off\t3
-Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-3\t4.5\thttps://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=80\tLondon Rag\tSquare Toe Chelsea Boots Camel\t799.0\tNo campaign\t4
-Ankle Boots\thttps://www.zalora.com.hk/p/rag-co-ankle-2\t5\thttps://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=80\tRag & CO.\tLeather Ankle Boots Brown\t1799.0\t15% off\t5
-Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-4\t4\thttps://images.unsplash.com/photo-1579338908476-3a3a1d71a706?w=80\tLondon Rag\tPlatform Sole Ankle Boots White\t949.0\tNo campaign\t6
-Long Boots\thttps://www.zalora.com.hk/p/london-rag-long-1\t4.5\thttps://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=80\tLondon Rag\tKnee High Stretch Boots Black\t1399.0\tNo campaign\t1
-Long Boots\thttps://www.zalora.com.hk/p/rag-co-long-1\t4.8\thttps://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=80\tRag & CO.\tLeather Knee High Boots Tan\t2199.0\t20% off\t2
-Long Boots\thttps://www.zalora.com.hk/p/london-rag-long-2\t4\thttps://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=80\tLondon Rag\tBlock Heel Long Boots Camel\t1199.0\tNo campaign\t3
-Long Boots\thttps://www.zalora.com.hk/p/rag-co-long-2\t5\thttps://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=80\tRag & CO.\tSuede Knee High Boots Brown\t2499.0\t20% off\t4
-Long Boots\thttps://www.zalora.com.hk/p/twenty-eight-long-1\t4.2\thttps://images.unsplash.com/photo-1596703263926-eb0762ee17e4?w=80\tTwenty Eight Shoes\tHeeled Long Boots Black\t1650.0\t10% off\t5"""
+SAMPLE = """Subcategory\tLink\tRatings\tImage_src\tBrand\tTitle\tPrice\tCampaign_Type\tRanking\tCountry
+Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-kelsey-stiletto-heel-6783657\t3\thttps://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=80\tFORCAST\tKelsey Stiletto Heel\t264.5\tX Pay HK$20 off\t1\tHong Kong
+Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-kelsey-stiletto-heel-6783661\t3\thttps://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=80\tFORCAST\tKelsey Stiletto Heel\t264.5\tX Pay HK$20 off\t2\tHong Kong
+Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-kelsey-leather-stiletto-heel-6783656\t4\thttps://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=80\tFORCAST\tKelsey Leather Stiletto Heel\t379.5\tX Pay HK$20 off\t3\tHong Kong
+Stiletto Heels\thttps://www.zalora.com.hk/p/rag-co-microfiber-stiletto-sandals-in-taupe-7051748\t4.8\thttps://images.unsplash.com/photo-1596703263926-eb0762ee17e4?w=80\tRag & CO.\tMicrofiber Stiletto Sandals in Taupe\t188.3\t30% off\t4\tSingapore
+Stiletto Heels\thttps://www.zalora.com.hk/p/rag-co-suede-stiletto-mules-in-black-7081384\t5\thttps://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=80\tRag & CO.\tSuede Stiletto Mules In Black\t293.3\t30% off\t5\tSingapore
+Stiletto Heels\thttps://www.zalora.com.hk/p/twenty-eight-shoes-10cm-silk-6783456\t4.8\thttps://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=80\tTwenty Eight Shoes\t10CM Silk Fabrics Pointed High Heel Shoes\t431.1\t10% off\t6\tMalaysia
+Stiletto Heels\thttps://www.zalora.com.hk/p/rag-co-patent-heel-7081390\t4.5\thttps://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=80\tRag & CO.\tPatent Leather Stiletto Pumps\t245.0\t30% off\t7\tMalaysia
+Stiletto Heels\thttps://www.zalora.com.hk/p/forcast-mini-stiletto-6783700\t3.5\thttps://images.unsplash.com/photo-1512361436605-a484bdb34b5f?w=80\tFORCAST\tMini Block Stiletto Heel\t199.0\tX Pay HK$20 off\t8\tHong Kong
+Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-1\t5\thttps://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=80\tLondon Rag\tBlock Heel Chelsea Ankle Boots Black\t899.0\tNo campaign\t1\tSingapore
+Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-2\t5\thttps://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=80\tLondon Rag\tCroc Embossed Ankle Boots Nude\t1099.0\tNo campaign\t2\tSingapore
+Ankle Boots\thttps://www.zalora.com.hk/p/rag-co-ankle-1\t4.8\thttps://images.unsplash.com/photo-1542291026-7eec264c27ff?w=80\tRag & CO.\tSuede Effect Ankle Boots Tan\t1599.0\t15% off\t3\tMalaysia
+Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-3\t4.5\thttps://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=80\tLondon Rag\tSquare Toe Chelsea Boots Camel\t799.0\tNo campaign\t4\tHong Kong
+Ankle Boots\thttps://www.zalora.com.hk/p/rag-co-ankle-2\t5\thttps://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=80\tRag & CO.\tLeather Ankle Boots Brown\t1799.0\t15% off\t5\tSingapore
+Ankle Boots\thttps://www.zalora.com.hk/p/london-rag-ankle-4\t4\thttps://images.unsplash.com/photo-1579338908476-3a3a1d71a706?w=80\tLondon Rag\tPlatform Sole Ankle Boots White\t949.0\tNo campaign\t6\tMalaysia
+Long Boots\thttps://www.zalora.com.hk/p/london-rag-long-1\t4.5\thttps://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=80\tLondon Rag\tKnee High Stretch Boots Black\t1399.0\tNo campaign\t1\tHong Kong
+Long Boots\thttps://www.zalora.com.hk/p/rag-co-long-1\t4.8\thttps://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=80\tRag & CO.\tLeather Knee High Boots Tan\t2199.0\t20% off\t2\tMalaysia
+Long Boots\thttps://www.zalora.com.hk/p/london-rag-long-2\t4\thttps://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=80\tLondon Rag\tBlock Heel Long Boots Camel\t1199.0\tNo campaign\t3\tSingapore
+Long Boots\thttps://www.zalora.com.hk/p/rag-co-long-2\t5\thttps://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=80\tRag & CO.\tSuede Knee High Boots Brown\t2499.0\t20% off\t4\tHong Kong
+Long Boots\thttps://www.zalora.com.hk/p/twenty-eight-long-1\t4.2\thttps://images.unsplash.com/photo-1596703263926-eb0762ee17e4?w=80\tTwenty Eight Shoes\tHeeled Long Boots Black\t1650.0\t10% off\t5\tMalaysia"""
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -135,8 +134,13 @@ with st.sidebar:
         "subcategory": "Subcategory", "link": "Link", "ratings": "Ratings",
         "image_src": "Image_src", "brand": "Brand", "title": "Title",
         "price": "Price", "campaign_type": "Campaign_Type", "ranking": "Ranking",
+        "country": "Country",
     }
     df_all.rename(columns={c: CANONICAL.get(c.lower(), c) for c in df_all.columns}, inplace=True)
+
+    # Add Country column with fallback if not present in the file
+    if "Country" not in df_all.columns:
+        df_all["Country"] = "Unknown"
 
     for col in ["Ratings","Price","Ranking"]:
         if col in df_all.columns:
@@ -148,10 +152,21 @@ with st.sidebar:
 
     # ── Filters ───────────────────────────────────────────────────────────────
     st.markdown("**Filters**")
-    cats = sorted(df_all["Subcategory"].dropna().unique().tolist())
-    brands = sorted(df_all["Brand"].dropna().unique().tolist())
+    cats     = sorted(df_all["Subcategory"].dropna().unique().tolist())
+    brands   = sorted(df_all["Brand"].dropna().unique().tolist())
+    countries = sorted(df_all["Country"].dropna().unique().tolist())
 
-    # Subcategory filter with Select All / Clear All
+    # ── Country filter ────────────────────────────────────────────────────────
+    coa, cob = st.columns(2)
+    if coa.button("✓ All", key="country_all", use_container_width=True):
+        st.session_state["sel_countries"] = countries
+    if cob.button("✕ Clear", key="country_clear", use_container_width=True):
+        st.session_state["sel_countries"] = []
+    if "sel_countries" not in st.session_state:
+        st.session_state["sel_countries"] = countries
+    sel_countries = st.multiselect("Country", countries, key="sel_countries")
+
+    # ── Subcategory filter ────────────────────────────────────────────────────
     ca, cb = st.columns(2)
     if ca.button("✓ All", key="cat_all", use_container_width=True):
         st.session_state["sel_cats"] = cats
@@ -161,7 +176,7 @@ with st.sidebar:
         st.session_state["sel_cats"] = cats
     sel_cats = st.multiselect("Subcategory", cats, key="sel_cats")
 
-    # Brand filter with Select All / Clear All
+    # ── Brand filter ──────────────────────────────────────────────────────────
     ba, bb = st.columns(2)
     if ba.button("✓ All", key="brand_all", use_container_width=True):
         st.session_state["sel_brands"] = brands
@@ -171,7 +186,10 @@ with st.sidebar:
         st.session_state["sel_brands"] = brands
     sel_brands = st.multiselect("Brands", brands, key="sel_brands")
 
+    # ── Apply filters ─────────────────────────────────────────────────────────
     df = df_all.copy()
+    if sel_countries:
+        df = df[df["Country"].isin(sel_countries)]
     if sel_cats:
         df = df[df["Subcategory"].isin(sel_cats)]
     if sel_brands:
@@ -230,7 +248,6 @@ with tab1:
 
     with c2:
         st.markdown('<p class="section-title">Rating distribution by brand</p>', unsafe_allow_html=True)
-        # Sort brands alphabetically so x-axis reads left-to-right naturally
         brand_order_rating = sorted(df["Brand"].unique().tolist())
         fig2 = px.box(df, x="Brand", y="Ratings", color="Brand",
                       color_discrete_sequence=COLORS, points="all",
@@ -239,7 +256,7 @@ with tab1:
                            height=320, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(range=[0,5.5], gridcolor="#E8E4DE"),
-                           xaxis=dict(tickangle=-90),   # upright labels
+                           xaxis=dict(tickangle=-90),
                            xaxis_title="", yaxis_title="Rating")
         fig2.update_traces(marker_size=6)
         st.plotly_chart(fig2, use_container_width=True)
@@ -248,6 +265,30 @@ with tab1:
         rating_summary = df.groupby("Brand")["Ratings"].agg(["mean","min","max","count"]).round(2).reset_index()
         rating_summary.columns = ["Brand","Avg_Rating","Min_Rating","Max_Rating","Products"]
         export_csv(rating_summary, "rating_distribution.csv")
+
+    st.markdown("---")
+
+    # ── ROW 1b — Country distribution ────────────────────────────────────────
+    st.markdown('<p class="section-title">Products by country</p>', unsafe_allow_html=True)
+    country_counts = df["Country"].value_counts().reset_index()
+    country_counts.columns = ["Country", "Count"]
+    country_counts["Share"] = (country_counts["Count"] / country_counts["Count"].sum() * 100).round(1)
+
+    fig_country = px.bar(
+        country_counts, x="Country", y="Count", color="Country",
+        color_discrete_sequence=COLORS, text="Count",
+    )
+    fig_country.update_traces(textposition="outside")
+    fig_country.update_layout(
+        showlegend=False, height=300,
+        margin=dict(t=10, b=60, l=0, r=0),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        yaxis=dict(gridcolor="#E8E4DE", title="# Products"),
+        xaxis=dict(tickangle=-90),
+        xaxis_title="",
+    )
+    st.plotly_chart(fig_country, use_container_width=True)
+    export_csv(country_counts, "products_by_country.csv")
 
     st.markdown("---")
 
@@ -264,7 +305,7 @@ with tab1:
                            height=340, paper_bgcolor="rgba(0,0,0,0)",
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(gridcolor="#E8E4DE"),
-                           xaxis=dict(tickangle=-90),   # upright labels
+                           xaxis=dict(tickangle=-90),
                            xaxis_title="", yaxis_title="Price (HK$)")
         st.plotly_chart(fig3, use_container_width=True)
         price_summary = df.groupby("Brand")["Price"].agg(["median","mean","min","max","count"]).round(1).reset_index()
@@ -274,7 +315,7 @@ with tab1:
     with c4:
         st.markdown('<p class="section-title">Price vs rating — where is the value gap?</p>', unsafe_allow_html=True)
         fig4 = px.scatter(df, x="Price", y="Ratings", color="Brand", size_max=14,
-                          hover_data=["Title","Subcategory","Ranking"],
+                          hover_data=["Title","Subcategory","Ranking","Country"],
                           color_discrete_sequence=COLORS,
                           size=[12]*len(df))
         med_price = df["Price"].median()
@@ -289,7 +330,7 @@ with tab1:
                            legend=dict(orientation="h", yanchor="bottom", y=1.01))
         st.plotly_chart(fig4, use_container_width=True)
         st.markdown('<div class="insight-box">💡 Products in the <b>top-left quadrant</b> (high rating, low price) are your biggest competitive threats. Top-right = premium sweet spot to aspire to.</div>', unsafe_allow_html=True)
-        scatter_export = df[["Brand","Title","Subcategory","Price","Ratings","Ranking"]].copy()
+        scatter_export = df[["Brand","Title","Subcategory","Country","Price","Ratings","Ranking"]].copy()
         export_csv(scatter_export, "price_vs_rating.csv")
 
     st.markdown("---")
@@ -311,7 +352,7 @@ with tab1:
                            plot_bgcolor="rgba(0,0,0,0)",
                            yaxis=dict(autorange="reversed", gridcolor="#E8E4DE",
                                       title="Avg ranking position (lower = better)"),
-                           xaxis=dict(tickangle=-90),   # upright labels
+                           xaxis=dict(tickangle=-90),
                            xaxis_title="")
         st.plotly_chart(fig5, use_container_width=True)
         st.markdown(f'<div class="insight-box">🔍 <b>{best.Brand}</b> has the best avg ranking position ({best["Avg Rank"]:.1f}). Study their title keywords and campaign types.</div>', unsafe_allow_html=True)
@@ -381,7 +422,7 @@ with tab1:
         unsafe_allow_html=True,
     )
 
-    show_cols = [c for c in ["Ranking","Image_src","Brand","Title","Subcategory","Price","Ratings","Campaign_Type"] if c in df.columns]
+    show_cols = [c for c in ["Ranking","Image_src","Brand","Title","Subcategory","Country","Price","Ratings","Campaign_Type"] if c in df.columns]
     all_products = df.sort_values("Ranking", na_position="last")[show_cols].reset_index(drop=True)
     all_products.index += 1
 
@@ -389,6 +430,7 @@ with tab1:
         "Price":   st.column_config.NumberColumn("Price (HK$)", format="HK$%.1f"),
         "Ratings": st.column_config.NumberColumn("Ratings ⭐", format="%.1f"),
         "Ranking": st.column_config.NumberColumn("Rank #", format="%d"),
+        "Country": st.column_config.TextColumn("Country"),
     }
     if "Image_src" in all_products.columns:
         col_cfg["Image_src"] = st.column_config.ImageColumn("Preview", help="Product thumbnail from retailer", width="small")
@@ -445,7 +487,7 @@ with tab2:
         coloraxis_colorbar=dict(title="HK$"),
         xaxis=dict(
             side="top",
-            tickangle=-90,      # ← upright, not slanted
+            tickangle=-90,
             tickfont=dict(size=12),
         ),
     )
@@ -496,6 +538,7 @@ with tab3:
         Best_Ranking=("Ranking","min"),
         Avg_Ranking=("Ranking","mean"),
         Categories=("Subcategory","nunique"),
+        Countries=("Country","nunique"),
     ).reset_index()
 
     camp_pct = (
@@ -526,6 +569,7 @@ with tab3:
             "Best_Ranking": st.column_config.NumberColumn("Best Rank #", format="%d"),
             "Avg_Ranking": st.column_config.NumberColumn("Avg Rank #", format="%.1f"),
             "Categories": st.column_config.NumberColumn("Categories Covered", format="%d"),
+            "Countries": st.column_config.NumberColumn("Countries Present", format="%d"),
             "Campaign_Coverage_%": st.column_config.ProgressColumn(
                 "Campaign Coverage %",
                 help="% of products running a campaign",
@@ -646,7 +690,7 @@ with tab4:
         height=340, margin=dict(t=10,b=100,l=0,r=0),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         yaxis=dict(title="% of products", gridcolor="#E8E4DE"),
-        xaxis=dict(tickangle=-90),   # upright
+        xaxis=dict(tickangle=-90),
         xaxis_title="",
         legend=dict(orientation="h", yanchor="bottom", y=1.01, title=""),
         showlegend=True,
